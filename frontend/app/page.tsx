@@ -1,4 +1,7 @@
 "use client";
+import { useAuth } from "./context/AuthContext";
+import AuthModal from "./components/AuthModal";
+import { User, LogOut } from "lucide-react";
 import CarruselOfertas from "./components/CarruselOfertas";
 import { useState, useEffect, useRef } from "react";
 import { 
@@ -24,7 +27,6 @@ import {
   Eye,
   ArrowUp,
   Sparkles,
-  TrendingUp,
   Users,
   Package,
   ThumbsUp
@@ -55,6 +57,10 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [notificacion, setNotificacion] = useState({ show: false, mensaje: "" });
   
+  // Auth state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { usuario, logout } = useAuth();
+  
   const heroRef = useRef<HTMLDivElement>(null);
   const productosRef = useRef<HTMLDivElement>(null);
   
@@ -80,7 +86,7 @@ export default function Home() {
   }, []);
 
   const categorias = [
-    { id: "todos", nombre: "Todos", icon: Sparkles },
+    { id: "todos", nombre: "Todos", icon: Sparkles, color: "from-blue-600 to-indigo-600" },
     { id: "herramientas", nombre: "Herramientas", icon: Wrench, color: "from-blue-500 to-blue-600" },
     { id: "seguridad", nombre: "Seguridad", icon: HardHat, color: "from-yellow-500 to-yellow-600" },
     { id: "aseo", nombre: "Aseo", icon: Droplet, color: "from-green-500 to-green-600" },
@@ -108,15 +114,23 @@ export default function Home() {
   };
 
   const handleAgregarAlCarrito = (producto: Producto) => {
+    if (!usuario) {
+      mostrarNotificacion("⚠️ Debes iniciar sesión para añadir productos");
+      setShowAuthModal(true);
+      return;
+    }
+
     agregarAlCarrito(producto);
     mostrarNotificacion(`✅ ${producto.nombre} agregado al carrito`);
     
     // Animación del botón
     const btn = document.getElementById(`btn-${producto.id}`);
-    btn?.classList.add("scale-110", "bg-green-600");
-    setTimeout(() => {
-      btn?.classList.remove("scale-110", "bg-green-600");
-    }, 200);
+    if (btn) {
+      btn.classList.add("scale-110", "bg-green-600");
+      setTimeout(() => {
+        btn.classList.remove("scale-110", "bg-green-600");
+      }, 200);
+    }
   };
 
   const scrollToTop = () => {
@@ -158,7 +172,7 @@ export default function Home() {
       {/* Barra superior animada */}
       <div className="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className={`absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M30 5L55 30L30 55L5 30L30 5Z" stroke="white" fill="none" stroke-width="1"/%3E%3C/svg%3E')] bg-repeat animate-pulse`}></div>
+          <div className={`absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M30 5L55 30L30 55L5 30L30 5Z" stroke=\"white\" fill=\"none\" stroke-width=\"1\"/%3E%3C/svg%3E')] bg-repeat animate-pulse`}></div>
         </div>
         <div className="container mx-auto px-4 py-2 relative">
           <div className="flex justify-between items-center text-sm">
@@ -232,6 +246,40 @@ export default function Home() {
 
             {/* Acciones */}
             <div className="flex items-center space-x-3">
+              {usuario ? (
+                <>
+                  <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-xl">
+                    <User size={18} className="text-blue-600" />
+                    <span className="text-sm font-medium">{usuario?.nombre}</span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="hidden md:flex items-center space-x-2 px-3 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all"
+                    title="Cerrar sesión"
+                  >
+                    <LogOut size={18} />
+                    <span className="text-sm">Salir</span>
+                  </button>
+                  {/* Versión móvil */}
+                  <button
+                    onClick={logout}
+                    className="md:hidden p-2 hover:bg-gray-100 rounded-xl"
+                    title="Cerrar sesión"
+                  >
+                    <LogOut size={20} />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="hidden md:flex items-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-md"
+                >
+                  <User size={18} />
+                  <span>Iniciar Sesión</span>
+                </button>
+              )}
+
+              {/* WhatsApp - Siempre visible */}
               <a
                 href={`https://wa.me/593${contactInfo.whatsapp.replace(/\D/g, '')}`}
                 target="_blank"
@@ -241,6 +289,8 @@ export default function Home() {
                 <Zap size={18} className="animate-pulse" />
                 <span>WhatsApp</span>
               </a>
+
+              {/* Carrito */}
               <button
                 onClick={() => setCarritoAbierto(true)}
                 className="relative p-3 hover:bg-gray-100 rounded-2xl transition-all group"
@@ -279,12 +329,14 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO SECTION INTERACTIVO */}
+      {/* Carrusel de Ofertas */}
       <section className="py-12">
-  <div className="container mx-auto px-4">
-    <CarruselOfertas />
-  </div>
-</section>
+        <div className="container mx-auto px-4">
+          <CarruselOfertas />
+        </div>
+      </section>
+
+      {/* HERO SECTION INTERACTIVO */}
       <section ref={heroRef} className="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white overflow-hidden">
         {/* Partículas animadas */}
         <div className="absolute inset-0 opacity-20">
@@ -562,7 +614,7 @@ export default function Home() {
       {/* SECCIÓN DE CONFIANZA INTERACTIVA */}
       <section className="py-20 bg-gradient-to-br from-blue-900 to-indigo-900 text-white overflow-hidden relative">
         <div className="absolute inset-0 opacity-10">
-          <div className={`absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M30 5L55 30L30 55L5 30L30 5Z" stroke="white" fill="none" stroke-width="1"/%3E%3C/svg%3E')] bg-repeat animate-pulse-slow`}></div>
+          <div className={`absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M30 5L55 30L30 55L5 30L30 5Z" stroke=\"white\" fill=\"none\" stroke-width=\"1\"/%3E%3C/svg%3E')] bg-repeat animate-pulse-slow`}></div>
         </div>
 
         <div className="container mx-auto px-4 relative">
@@ -684,16 +736,20 @@ export default function Home() {
       </button>
 
       {/* Botón WhatsApp flotante */}
-<a
-  href={`https://wa.me/593${contactInfo.whatsapp.replace(/\D/g, '')}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition-all transform hover:scale-110 z-50 group animate-bounce-slow">
-  <Zap size={28} />
-  <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-    ¡Chatea con nosotros!
-  </span>
-</a>
+      <a
+        href={`https://wa.me/593${contactInfo.whatsapp.replace(/\D/g, '')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition-all transform hover:scale-110 z-50 group animate-bounce-slow"
+      >
+        <Zap size={28} />
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          ¡Chatea con nosotros!
+        </span>
+      </a>
+
+      {/* Modal de autenticación */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
       {/* Modal de vista rápida */}
       {showModal && selectedProduct && (

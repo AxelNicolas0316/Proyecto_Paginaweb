@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CarritoProvider } from "./context/CarritoContext";
+import { AuthProvider } from "./context/AuthContext";
 import ChatBot from "./components/ChatBot";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <CarritoProvider>
-          {children}
-          <ChatBot /> {/* Agregado aquí */}
-        </CarritoProvider>
+        <AuthProvider>
+          <CarritoProvider>
+            {children}
+            <ChatBot />
+          </CarritoProvider>
+        </AuthProvider>
       </body>
     </html>
   );
