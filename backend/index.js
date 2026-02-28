@@ -5,6 +5,7 @@ const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { Pool } = require('pg');
 
+//remember???
 // Configurar la conexión a PostgreSQL
 const connectionString = "postgresql://postgres:Soriano03@localhost:5432/suministros_db?schema=public";
 
