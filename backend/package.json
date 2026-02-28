@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "postinstall": "npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,12 +16,14 @@
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "pg": "^8.19.0"
   },
   "devDependencies": {
     "@types/node": "^25.3.2",
     "@types/pg": "^8.16.0",
-    "prisma": "^7.4.1"
+    "prisma": "^7.4.1",
+    "nodemon": "^2.0.22"
   }
 }

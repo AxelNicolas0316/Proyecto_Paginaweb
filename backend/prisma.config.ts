@@ -1,7 +1,9 @@
 // backend/prisma.config.ts
+import dotenv from 'dotenv'
+dotenv.config()
 import { defineConfig } from '@prisma/config'
 
-const databaseUrl = "postgresql://postgres:Soriano03@localhost:5432/suministros_db?schema=public"
+const databaseUrl = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?schema=public`
 
 export default defineConfig({
   datasource: {
