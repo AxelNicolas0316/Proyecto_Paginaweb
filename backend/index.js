@@ -30,7 +30,7 @@ app.use(cors());
 app.use(express.json());
 
 // Ruta de prueba de conexión
-app.get('/api/test', async (req, res) => {
+app.get('/api/tes', async (req, res) => {
   try {
     // Usar una consulta raw para probar la conexión
     const result = await prisma.$queryRaw`SELECT 1 as conexion`;

@@ -3,7 +3,6 @@ module.exports = function (app) {
   return function methodNotAllowed(req, res, next) {
     try {
       if (!app || !app._router || !app._router.stack) return next();
-
       const allowed = new Set();
       let matched = false;
 
