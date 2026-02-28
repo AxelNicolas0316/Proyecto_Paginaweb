@@ -1,4 +1,5 @@
 // backend/index.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
@@ -6,8 +7,8 @@ const { PrismaPg } = require('@prisma/adapter-pg');
 const { Pool } = require('pg');
 
 
-// Configurar la conexión a PostgreSQL
-const connectionString = "postgresql://postgres:Soriano03@localhost:5432/suministros_db?schema=public";
+// Configurar la conexión a PostgreSQL desde variables de entorno
+const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?schema=public`;
 
 // Crear un pool de conexiones (recomendado para producción)
 const pool = new Pool({ connectionString });
@@ -19,7 +20,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const app = express();
-const port = 3001;
+const port = process.env.NODE_PORT || 3001;
 
 // Middlewares
 app.use(cors());
